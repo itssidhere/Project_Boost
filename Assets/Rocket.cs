@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Rocket : MonoBehaviour {
+    [SerializeField] float rcs = 100f;
+    [SerializeField] float mainThrust = 100f;
     new Rigidbody rigidbody;
     AudioSource audioSource;
     bool m_Play;
@@ -16,29 +18,44 @@ public class Rocket : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        ProcessInput();
-        //PlayAudio();
+        HandleThrust();
+        HandleRotate();
 	}
 
-    private void PlayAudio()
+
+    private void OnCollisionEnter(Collision collision)
     {
-        if (m_Play == true && m_ToggleChange == true)
+        switch (collision.gameObject.tag)
         {
-            audioSource.Play();
-            m_ToggleChange = false;
-        }
-        if (m_Play == false && m_ToggleChange == true)
-        {
-            audioSource.Stop();
-            m_ToggleChange = false;
+            case "Friendly":
+                print("uh yeaaaaaaaah");
+                break;
+            default:
+                print("betichod i am dead");
+                break;
         }
     }
+    private void HandleRotate()
+    {
+        rigidbody.freezeRotation = true;
+        
+        float scalerSpeed = Time.deltaTime * rcs;
+        if (Input.GetKey(KeyCode.D))
+        {
+            transform.Rotate(-Vector3.forward * scalerSpeed);
+        }
+        else if (Input.GetKey(KeyCode.A))
+        {
+            transform.Rotate(Vector3.forward * scalerSpeed);
+        }
+        rigidbody.freezeRotation = false;
+    }
 
-    private void ProcessInput()
+    private void HandleThrust()
     {
         if (Input.GetKey(KeyCode.Space))
         {
-            rigidbody.AddRelativeForce(Vector3.up);
+            rigidbody.AddRelativeForce(Vector3.up * mainThrust);
             if (!audioSource.isPlaying)
             {
                 audioSource.Play();
@@ -47,14 +64,6 @@ public class Rocket : MonoBehaviour {
         else
         {
             audioSource.Stop();
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            transform.Rotate(-Vector3.forward * Time.deltaTime);
-        }
-        else if (Input.GetKey(KeyCode.A))
-        {
-            transform.Rotate(Vector3.forward * Time.deltaTime);
         }
     }
 }
